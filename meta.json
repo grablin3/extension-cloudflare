@@ -1,0 +1,55 @@
+{
+  "version": "3.0.0",
+
+  "metadata": {
+    "id": "extension-cloudflare",
+    "name": "Cloudflare DNS Provider",
+    "kind": "extension",
+    "layers": ["ops"],
+    "type": "cloudflare",
+    "description": "Cloudflare DNS and SSL certificate management",
+    "version": "1.0.0",
+    "author": "Genesis Team",
+    "tags": ["dns", "cloudflare", "ssl", "certificates"],
+    "compatibleWith": ["aws"],
+    "requires": []
+  },
+
+  "fields": [
+    {
+      "key": "zoneId",
+      "label": "Cloudflare Zone ID",
+      "type": "text",
+      "required": true,
+      "description": "Cloudflare DNS zone identifier",
+      "category": "configuration"
+    }
+  ],
+
+  "dependencies": {},
+
+  "generation": {
+    "layers": {
+      "ops": {}
+    }
+  },
+
+  "runtimeConfigTemplate": [
+    {
+      "key": "CLOUDFLARE_API_TOKEN",
+      "description": "Cloudflare API token for DNS and SSL management",
+      "example": "your-cloudflare-token",
+      "required": true,
+      "secret": true,
+      "targets": ["ops"]
+    },
+    {
+      "key": "CLOUDFLARE_ZONE_ID",
+      "description": "Cloudflare zone ID for domain",
+      "example": "abc123def456",
+      "required": true,
+      "secret": false,
+      "targets": ["ops"]
+    }
+  ]
+}

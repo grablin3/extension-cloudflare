@@ -1,0 +1,29 @@
+# Cloudflare Configuration
+# This file configures Cloudflare settings for your application
+
+zones:
+  - name: {{domain}}
+    settings:
+      ssl: full
+      cache_level: aggressive
+      minify:
+        css: true
+        html: true
+        js: true
+
+      security_level: medium
+
+      page_rules:
+        - targets:
+            - "{{domain}}/api/*"
+          actions:
+            cache_level: bypass
+
+        - targets:
+            - "{{domain}}/static/*"
+          actions:
+            cache_level: cache_everything
+            edge_cache_ttl: 31536000
+
+# API Token is stored in secrets manager
+# Required for deployment: CLOUDFLARE_API_TOKEN
