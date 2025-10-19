@@ -15,7 +15,7 @@
     "requires": []
   },
 
-  "fields": [
+  "scaffoldConfigTemplate": [
     {
       "key": "zoneId",
       "label": "Cloudflare Zone ID",
@@ -27,6 +27,10 @@
   ],
 
   "dependencies": {},
+
+  "files": [
+    "ops/cloudflare-config.yaml.mustache"
+  ],
 
   "generation": {
     "layers": {
