@@ -1,20 +1,31 @@
 {
   "version": "3.0.0",
-
   "metadata": {
     "id": "extension-cloudflare",
     "name": "Cloudflare DNS & SSL",
     "kind": "extension",
-    "layers": ["ops", "cicd"],
+    "layers": [
+      "ops",
+      "cicd"
+    ],
     "type": "cloudflare",
     "description": "Cloudflare DNS management and SSL certificate automation workflows",
     "version": "1.0.0",
     "author": "Genesis Team",
-    "tags": ["cloudflare", "dns", "ssl", "github-actions", "aws"],
-    "compatibleWith": ["aws"],
-    "requires": ["github"]
+    "tags": [
+      "cloudflare",
+      "dns",
+      "ssl",
+      "github-actions",
+      "aws"
+    ],
+    "compatibleWith": [
+      "aws"
+    ],
+    "requires": [
+      "github"
+    ]
   },
-
   "scaffoldConfigTemplate": [
     {
       "key": "zoneId",
@@ -25,13 +36,7 @@
       "category": "configuration"
     }
   ],
-
   "dependencies": {},
-
-  "files": [
-    "ops/cloudflare-config.yaml.mustache"
-  ],
-
   "generation": {
     "files": {
       "remove": []
@@ -41,7 +46,6 @@
       "cicd": {}
     }
   },
-
   "runtimeConfigTemplate": [
     {
       "key": "CLOUDFLARE_API_TOKEN",
@@ -49,7 +53,9 @@
       "example": "your-cloudflare-token",
       "required": true,
       "secret": true,
-      "targets": ["ops"]
+      "targets": [
+        "ops"
+      ]
     },
     {
       "key": "CLOUDFLARE_ZONE_ID",
@@ -57,7 +63,9 @@
       "example": "abc123def456",
       "required": true,
       "secret": false,
-      "targets": ["ops"]
+      "targets": [
+        "ops"
+      ]
     }
   ]
 }
