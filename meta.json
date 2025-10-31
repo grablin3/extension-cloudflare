@@ -24,7 +24,15 @@
     ],
     "requires": [
       "github"
-    ]
+    ],
+    "providesFragments": {
+      "dns-provider-message": {
+        "mode": "conflict"
+      },
+      "dns-auto-manage": {
+        "mode": "conflict"
+      }
+    }
   },
   "scaffoldConfigTemplate": [
     {

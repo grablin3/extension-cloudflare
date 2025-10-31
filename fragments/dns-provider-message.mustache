@@ -1,0 +1,7 @@
+if [ -n "{{{githubVarsOpen}}} secrets.DNS_PROVIDER_KEY  {{{githubVarsClose}}}" ]; then
+  echo "🚀 Cloudflare automatic DNS management will be attempted in the next step"
+  echo "⏳ Both certificates will auto-validate once DNS records are added"
+else
+  echo "⚠️  IMPORTANT: Add ALL CNAME records above to your DNS provider"
+  echo "⏳ Both certificates will auto-validate once DNS records are added"
+fi
