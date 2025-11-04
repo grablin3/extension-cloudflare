@@ -27,10 +27,12 @@
     ],
     "providesFragments": {
       "dns-provider-message": {
-        "mode": "conflict"
+        "mode": "conflict",
+        "notes": "Provides Cloudflare-specific DNS setup instructions in deployment documentation"
       },
       "dns-auto-manage": {
-        "mode": "conflict"
+        "mode": "conflict",
+        "notes": "Enables automated DNS record management via Cloudflare API in CI/CD workflows"
       }
     }
   },
