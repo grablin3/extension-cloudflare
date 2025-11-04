@@ -303,7 +303,7 @@ jobs:
           echo "2. Or use Route 53 to create an alias record"
           echo ""
           echo "🧪 Test your HTTPS endpoint:"
-          echo "curl -k https://$ALB_DNS/app/v1/public/health"
+          echo "curl -k https://$ALB_DNS/api/v1/public/health"
 
       - name: Update Cloudflare DNS for ALB
         run: |
