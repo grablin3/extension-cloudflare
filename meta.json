@@ -44,6 +44,15 @@
       "required": true,
       "description": "Cloudflare DNS zone identifier",
       "category": "configuration"
+    },
+    {
+      "key": "cloudflareApiKey",
+      "label": "Cloudflare Api Key",
+      "type": "password",
+      "required": true,
+      "description": "Required to setup DNS records",
+      "category": "configuration",
+      "gitStoreKey": "CLOUDFLARE_API_KEY"
     }
   ],
   "dependencies": {},

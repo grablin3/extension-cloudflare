@@ -1,8 +1,8 @@
 echo "🔍 Checking for DNS provider API key..."
 
-# Check if DNS_PROVIDER_KEY secret is available
-if [ -z "{{{githubVarsOpen}}} secrets.DNS_PROVIDER_KEY  {{{githubVarsClose}}}" ]; then
-  echo "⚠️ No DNS_PROVIDER_KEY secret found. Skipping automatic DNS management."
+# Check if CLOUDFLARE_API_KEY secret is available
+if [ -z "{{{githubVarsOpen}}} secrets.CLOUDFLARE_API_KEY  {{{githubVarsClose}}}" ]; then
+  echo "⚠️ No CLOUDFLARE_API_KEY secret found. Skipping automatic DNS management."
   echo "DNS_AUTO_MANAGED=false" >> $GITHUB_OUTPUT
   exit 0
 fi
@@ -135,7 +135,7 @@ DOMAIN_BASE="{{sld}}.{{tld}}"
 
 echo "🔍 Testing Cloudflare API connectivity..."
 test_response=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones?name=$DOMAIN_BASE" \
-  -H "Authorization: Bearer {{{githubVarsOpen}}} secrets.DNS_PROVIDER_KEY  {{{githubVarsClose}}}" \
+  -H "Authorization: Bearer {{{githubVarsOpen}}} secrets.CLOUDFLARE_API_KEY  {{{githubVarsClose}}}" \
   -H "Content-Type: application/json" 2>/dev/null || echo '{"success":false}')
 
 if echo "$test_response" | jq -e '.success' >/dev/null 2>&1; then
@@ -155,12 +155,12 @@ if [ $? -eq 0 ] && [ -n "$ui_records" ]; then
       echo "  Processing: $domain -> $cname_name -> $cname_value"
 
       # Check if record already exists
-      record_exists=$(check_cloudflare_record "$DOMAIN_BASE" "$cname_name" "{{{githubVarsOpen}}} secrets.DNS_PROVIDER_KEY  {{{githubVarsClose}}}")
+      record_exists=$(check_cloudflare_record "$DOMAIN_BASE" "$cname_name" "{{{githubVarsOpen}}} secrets.CLOUDFLARE_API_KEY  {{{githubVarsClose}}}")
       if [ "$record_exists" = "true" ]; then
         echo "  ✅ CNAME record already exists: $cname_name"
       else
         echo "  ➕ Adding CNAME record: $cname_name -> $cname_value"
-        add_cloudflare_record "$DOMAIN_BASE" "$cname_name" "$cname_value" "{{{githubVarsOpen}}} secrets.DNS_PROVIDER_KEY  {{{githubVarsClose}}}" || true
+        add_cloudflare_record "$DOMAIN_BASE" "$cname_name" "$cname_value" "{{{githubVarsOpen}}} secrets.CLOUDFLARE_API_KEY  {{{githubVarsClose}}}" || true
       fi
     fi
   done
@@ -175,12 +175,12 @@ if [ $? -eq 0 ] && [ -n "$api_records" ]; then
       echo "  Processing: $domain -> $cname_name -> $cname_value"
 
       # Check if record already exists
-      record_exists=$(check_cloudflare_record "$DOMAIN_BASE" "$cname_name" "{{{githubVarsOpen}}} secrets.DNS_PROVIDER_KEY  {{{githubVarsClose}}}")
+      record_exists=$(check_cloudflare_record "$DOMAIN_BASE" "$cname_name" "{{{githubVarsOpen}}} secrets.CLOUDFLARE_API_KEY  {{{githubVarsClose}}}")
       if [ "$record_exists" = "true" ]; then
         echo "  ✅ CNAME record already exists: $cname_name"
       else
         echo "  ➕ Adding CNAME record: $cname_name -> $cname_value"
-        add_cloudflare_record "$DOMAIN_BASE" "$cname_name" "$cname_value" "{{{githubVarsOpen}}} secrets.DNS_PROVIDER_KEY  {{{githubVarsClose}}}" || true
+        add_cloudflare_record "$DOMAIN_BASE" "$cname_name" "$cname_value" "{{{githubVarsOpen}}} secrets.CLOUDFLARE_API_KEY  {{{githubVarsClose}}}" || true
       fi
     fi
   done

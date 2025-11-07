@@ -273,9 +273,9 @@ jobs:
         run: |
           echo "🔍 Checking for DNS provider API key..."
 
-          # Check if DNS_PROVIDER_KEY secret is available
-          if [ -z "{{{githubVarsOpen}}} secrets.DNS_PROVIDER_KEY  {{{githubVarsClose}}}" ]; then
-            echo "⚠️ No DNS_PROVIDER_KEY secret found. Skipping DNS management."
+          # Check if CLOUDFLARE_API_KEY secret is available
+          if [ -z "{{{githubVarsOpen}}} secrets.CLOUDFLARE_API_KEY  {{{githubVarsClose}}}" ]; then
+            echo "⚠️ No CLOUDFLARE_API_KEY secret found. Skipping DNS management."
             exit 0
           fi
 
@@ -455,7 +455,7 @@ jobs:
           # Test Cloudflare API connectivity
           echo "🔍 Testing Cloudflare API connectivity..."
           test_response=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones?name=$DOMAIN_BASE" \
-            -H "Authorization: Bearer {{{githubVarsOpen}}} secrets.DNS_PROVIDER_KEY  {{{githubVarsClose}}}" \
+            -H "Authorization: Bearer {{{githubVarsOpen}}} secrets.CLOUDFLARE_API_KEY  {{{githubVarsClose}}}" \
             -H "Content-Type: application/json" 2>/dev/null || echo '{"success":false}')
 
           if echo "$test_response" | jq -e '.success' >/dev/null 2>&1; then
@@ -467,13 +467,13 @@ jobs:
 
           # Check if CNAME record exists
           echo "🔍 Checking if CNAME record exists..."
-          record_exists=$(check_cloudflare_record "$DOMAIN_BASE" "$UI_DOMAIN" "{{{githubVarsOpen}}} secrets.DNS_PROVIDER_KEY  {{{githubVarsClose}}}")
+          record_exists=$(check_cloudflare_record "$DOMAIN_BASE" "$UI_DOMAIN" "{{{githubVarsOpen}}} secrets.CLOUDFLARE_API_KEY  {{{githubVarsClose}}}")
 
           if [ "$record_exists" = "true" ]; then
             echo "✅ CNAME record exists, checking if update is needed..."
 
             # Get existing record info
-            record_info=$(get_cloudflare_record_info "$DOMAIN_BASE" "$UI_DOMAIN" "{{{githubVarsOpen}}} secrets.DNS_PROVIDER_KEY  {{{githubVarsClose}}}")
+            record_info=$(get_cloudflare_record_info "$DOMAIN_BASE" "$UI_DOMAIN" "{{{githubVarsOpen}}} secrets.CLOUDFLARE_API_KEY  {{{githubVarsClose}}}")
 
             if [ "$record_info" != "false" ]; then
               existing_value=$(echo "$record_info" | jq -r '.content' 2>/dev/null)
@@ -486,15 +486,15 @@ jobs:
                 echo "✅ CNAME record is already up to date"
               else
                 echo "🔄 Updating CNAME record..."
-                update_cloudflare_record "$DOMAIN_BASE" "$record_id" "$UI_DOMAIN" "$CLOUDFRONT_DOMAIN" "{{{githubVarsOpen}}} secrets.DNS_PROVIDER_KEY  {{{githubVarsClose}}}"
+                update_cloudflare_record "$DOMAIN_BASE" "$record_id" "$UI_DOMAIN" "$CLOUDFRONT_DOMAIN" "{{{githubVarsOpen}}} secrets.CLOUDFLARE_API_KEY  {{{githubVarsClose}}}"
               fi
             else
               echo "⚠️ Could not get existing record info, creating new record..."
-              add_cloudflare_record "$DOMAIN_BASE" "$UI_DOMAIN" "$CLOUDFRONT_DOMAIN" "{{{githubVarsOpen}}} secrets.DNS_PROVIDER_KEY  {{{githubVarsClose}}}"
+              add_cloudflare_record "$DOMAIN_BASE" "$UI_DOMAIN" "$CLOUDFRONT_DOMAIN" "{{{githubVarsOpen}}} secrets.CLOUDFLARE_API_KEY  {{{githubVarsClose}}}"
             fi
           else
             echo "➕ Creating new CNAME record..."
-            add_cloudflare_record "$DOMAIN_BASE" "$UI_DOMAIN" "$CLOUDFRONT_DOMAIN" "{{{githubVarsOpen}}} secrets.DNS_PROVIDER_KEY  {{{githubVarsClose}}}"
+            add_cloudflare_record "$DOMAIN_BASE" "$UI_DOMAIN" "$CLOUDFRONT_DOMAIN" "{{{githubVarsOpen}}} secrets.CLOUDFLARE_API_KEY  {{{githubVarsClose}}}"
           fi
 
           echo "✅ Cloudflare DNS management completed!"
