@@ -5,7 +5,6 @@
     "name": "Cloudflare DNS & SSL",
     "kind": "extension",
     "layers": [
-      "ops",
       "cicd"
     ],
     "type": "cloudflare",
@@ -61,7 +60,6 @@
       "remove": []
     },
     "layers": {
-      "ops": {},
       "cicd": {}
     }
   },
