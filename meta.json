@@ -11,6 +11,7 @@
     "description": "Cloudflare DNS management and SSL certificate automation workflows",
     "version": "1.0.0",
     "author": "Genesis Team",
+    "affiliateUrl": "https://domains.cloudflare.com",
     "tags": [
       "cloudflare",
       "dns",
