@@ -19,6 +19,7 @@
       "github-actions",
       "aws"
     ],
+    "providers": ["aws"],
     "compatibleWith": [
       "aws"
     ],
