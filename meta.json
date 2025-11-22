@@ -39,14 +39,6 @@
   },
   "scaffoldConfigTemplate": [
     {
-      "key": "zoneId",
-      "label": "Cloudflare Zone ID",
-      "type": "text",
-      "required": true,
-      "description": "Cloudflare DNS zone identifier",
-      "category": "configuration"
-    },
-    {
       "key": "cloudflareApiKey",
       "label": "Cloudflare Api Key",
       "type": "password",
@@ -65,18 +57,6 @@
       "cicd": {}
     }
   },
-  "runtimeConfigTemplate": [
-    {
-      "key": "CLOUDFLARE_ZONE_ID",
-      "description": "Cloudflare zone ID for domain",
-      "example": "abc123def456",
-      "required": true,
-      "secret": false,
-      "targets": [
-        "ops"
-      ],
-      "commonForAllEnv": true
-    }
-  ],
+  "runtimeConfigTemplate": [],
   "gitignore": []
 }
