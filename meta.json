@@ -19,7 +19,9 @@
       "github-actions",
       "aws"
     ],
-    "providers": ["aws"],
+    "providers": [
+      "aws"
+    ],
     "compatibleWith": [
       "aws"
     ],
@@ -35,6 +37,9 @@
         "mode": "conflict",
         "notes": "Enables automated DNS record management via Cloudflare API in CI/CD workflows"
       }
+    },
+    "onConflict": {
+      "message": "Choose only one DNS provider"
     }
   },
   "scaffoldConfigTemplate": [
