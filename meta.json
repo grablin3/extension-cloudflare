@@ -13,11 +13,8 @@
     "author": "Genesis Team",
     "affiliateUrl": "https://domains.cloudflare.com",
     "tags": [
-      "cloudflare",
       "dns",
-      "ssl",
-      "github-actions",
-      "aws"
+      "cloudflare"
     ],
     "providers": [
       "aws"
