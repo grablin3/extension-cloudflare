@@ -59,6 +59,5 @@
       "cicd": {}
     }
   },
-  "runtimeConfigTemplate": [],
-  "gitignore": []
+  "runtimeConfigTemplate": []
 }
