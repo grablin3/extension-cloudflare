@@ -45,6 +45,7 @@
       "label": "Cloudflare Api Key",
       "type": "password",
       "required": true,
+      "secret": true,
       "description": "Required to setup DNS records",
       "category": "configuration",
       "gitStoreKey": "CLOUDFLARE_API_KEY"
