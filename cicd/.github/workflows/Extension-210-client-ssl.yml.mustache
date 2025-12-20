@@ -2,6 +2,12 @@ name: Extension-210-Client-SSL-Cloudflare
 
 on:
   workflow_dispatch:
+    inputs:
+      include-apex-domain:
+        description: 'Also configure apex domain ({{sld}}.{{tld}}) to point to this app'
+        type: boolean
+        default: false
+        required: false
 
 permissions:
   contents: read
@@ -35,6 +41,7 @@ jobs:
 
           PROJECT_NAME="{{projectName}}"
           ENVIRONMENT="{{{githubVarsOpen}}} env.ENVIRONMENT  {{{githubVarsClose}}}"
+          INCLUDE_APEX="{{{githubVarsOpen}}} inputs.include-apex-domain {{{githubVarsClose}}}"
 
           # Domain construction with environment-specific prefix
           APEX_DOMAIN="{{sld}}.{{tld}}"
@@ -49,6 +56,7 @@ jobs:
           echo "  Environment: $ENVIRONMENT"
           echo "  Apex Domain: $APEX_DOMAIN"
           echo "  UI Domain: $UI_DOMAIN"
+          echo "  Include Apex: $INCLUDE_APEX"
 
           # Find the CloudFront distribution
           echo "🔍 Finding CloudFront distribution..."
@@ -194,17 +202,31 @@ jobs:
           ETAG=$(jq -r '.ETag' /tmp/dist-config.json)
           echo "Current ETag: $ETAG"
 
-          # Update distribution config to add alternate domains (apex + UI subdomain)
+          # Update distribution config to add alternate domains
           echo "📝 Adding alternate domains to distribution..."
-          jq --arg apex_domain "$APEX_DOMAIN" --arg ui_domain "$UI_DOMAIN" --arg cert_arn "$CERT_ARN" '
-            .DistributionConfig.Aliases.Quantity = (.DistributionConfig.Aliases.Quantity + 2) |
-            .DistributionConfig.Aliases.Items += [$apex_domain, $ui_domain] |
-            .DistributionConfig.ViewerCertificate.CloudFrontDefaultCertificate = false |
-            .DistributionConfig.ViewerCertificate.ACMCertificateArn = $cert_arn |
-            .DistributionConfig.ViewerCertificate.SSLSupportMethod = "sni-only" |
-            .DistributionConfig.ViewerCertificate.MinimumProtocolVersion = "TLSv1.2_2021" |
-            del(.DistributionConfig.ViewerCertificate.CertificateSource)
-          ' /tmp/dist-config.json > /tmp/updated-dist-config.json
+          if [ "$INCLUDE_APEX" = "true" ]; then
+            echo "  Adding both UI domain and apex domain..."
+            jq --arg apex_domain "$APEX_DOMAIN" --arg ui_domain "$UI_DOMAIN" --arg cert_arn "$CERT_ARN" '
+              .DistributionConfig.Aliases.Quantity = (.DistributionConfig.Aliases.Quantity + 2) |
+              .DistributionConfig.Aliases.Items += [$apex_domain, $ui_domain] |
+              .DistributionConfig.ViewerCertificate.CloudFrontDefaultCertificate = false |
+              .DistributionConfig.ViewerCertificate.ACMCertificateArn = $cert_arn |
+              .DistributionConfig.ViewerCertificate.SSLSupportMethod = "sni-only" |
+              .DistributionConfig.ViewerCertificate.MinimumProtocolVersion = "TLSv1.2_2021" |
+              del(.DistributionConfig.ViewerCertificate.CertificateSource)
+            ' /tmp/dist-config.json > /tmp/updated-dist-config.json
+          else
+            echo "  Adding UI domain only..."
+            jq --arg ui_domain "$UI_DOMAIN" --arg cert_arn "$CERT_ARN" '
+              .DistributionConfig.Aliases.Quantity = (.DistributionConfig.Aliases.Quantity + 1) |
+              .DistributionConfig.Aliases.Items += [$ui_domain] |
+              .DistributionConfig.ViewerCertificate.CloudFrontDefaultCertificate = false |
+              .DistributionConfig.ViewerCertificate.ACMCertificateArn = $cert_arn |
+              .DistributionConfig.ViewerCertificate.SSLSupportMethod = "sni-only" |
+              .DistributionConfig.ViewerCertificate.MinimumProtocolVersion = "TLSv1.2_2021" |
+              del(.DistributionConfig.ViewerCertificate.CertificateSource)
+            ' /tmp/dist-config.json > /tmp/updated-dist-config.json
+          fi
 
           # Extract just the DistributionConfig for the update
           jq '.DistributionConfig' /tmp/updated-dist-config.json > /tmp/final-config.json
@@ -294,17 +316,20 @@ jobs:
           echo "✅ CloudFront domain: $CLOUDFRONT_DOMAIN"
 
           # Domain construction with environment-specific prefix
+          INCLUDE_APEX="{{{githubVarsOpen}}} inputs.include-apex-domain {{{githubVarsClose}}}"
           if [ "${ENVIRONMENT}" = "prod" ] || [ "${ENVIRONMENT}" = "production" ]; then
             UI_DOMAIN="{{projectName}}-ui.{{sld}}.{{tld}}"
           else
             UI_DOMAIN="{{projectName}}-ui-${ENVIRONMENT}.{{sld}}.{{tld}}"
           fi
           DOMAIN_BASE="{{sld}}.{{tld}}"
+          APEX_DOMAIN="{{sld}}.{{tld}}"
 
           echo "📋 DNS Configuration:"
           echo "  CNAME Name: $UI_DOMAIN"
           echo "  CNAME Value: $CLOUDFRONT_DOMAIN"
           echo "  Zone: $DOMAIN_BASE"
+          echo "  Include Apex: $INCLUDE_APEX"
 
           # Function to check if CNAME record exists in Cloudflare
           check_cloudflare_record() {
@@ -486,6 +511,36 @@ jobs:
           else
             echo "➕ Creating new CNAME record..."
             add_cloudflare_record "$DOMAIN_BASE" "$UI_DOMAIN" "$CLOUDFRONT_DOMAIN" "{{{githubVarsOpen}}} secrets.CLOUDFLARE_API_KEY  {{{githubVarsClose}}}"
+          fi
+
+          # Handle apex domain if requested
+          if [ "$INCLUDE_APEX" = "true" ]; then
+            echo ""
+            echo "📋 Processing apex domain: $APEX_DOMAIN"
+            apex_record_exists=$(check_cloudflare_record "$DOMAIN_BASE" "$APEX_DOMAIN" "{{{githubVarsOpen}}} secrets.CLOUDFLARE_API_KEY  {{{githubVarsClose}}}")
+
+            if [ "$apex_record_exists" = "true" ]; then
+              echo "✅ Apex CNAME record exists, checking if update is needed..."
+              apex_record_info=$(get_cloudflare_record_info "$DOMAIN_BASE" "$APEX_DOMAIN" "{{{githubVarsOpen}}} secrets.CLOUDFLARE_API_KEY  {{{githubVarsClose}}}")
+
+              if [ "$apex_record_info" != "false" ]; then
+                apex_existing_value=$(echo "$apex_record_info" | jq -r '.content' 2>/dev/null)
+                apex_record_id=$(echo "$apex_record_info" | jq -r '.id' 2>/dev/null)
+
+                if [ "$apex_existing_value" = "$CLOUDFRONT_DOMAIN" ]; then
+                  echo "✅ Apex CNAME record is already up to date"
+                else
+                  echo "🔄 Updating apex CNAME record..."
+                  update_cloudflare_record "$DOMAIN_BASE" "$apex_record_id" "$APEX_DOMAIN" "$CLOUDFRONT_DOMAIN" "{{{githubVarsOpen}}} secrets.CLOUDFLARE_API_KEY  {{{githubVarsClose}}}"
+                fi
+              else
+                echo "⚠️ Could not get existing apex record info, creating new record..."
+                add_cloudflare_record "$DOMAIN_BASE" "$APEX_DOMAIN" "$CLOUDFRONT_DOMAIN" "{{{githubVarsOpen}}} secrets.CLOUDFLARE_API_KEY  {{{githubVarsClose}}}"
+              fi
+            else
+              echo "➕ Creating new apex CNAME record..."
+              add_cloudflare_record "$DOMAIN_BASE" "$APEX_DOMAIN" "$CLOUDFRONT_DOMAIN" "{{{githubVarsOpen}}} secrets.CLOUDFLARE_API_KEY  {{{githubVarsClose}}}"
+            fi
           fi
 
           echo "✅ Cloudflare DNS management completed!"
